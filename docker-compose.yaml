@@ -6,54 +6,54 @@ services:
     ports:
       - 8222:8222
 
-  # orders-db:
-  #   image: postgres:16
-  #   container_name: orders_postgres
-  #   environment:
-  #     POSTGRES_DB: orders_db
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - ./orders-ms/postgres:/var/lib/postgresql/data
-  #   restart: always
+  orders-db:
+    image: postgres:16
+    container_name: orders_postgres
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./orders-ms/postgres:/var/lib/postgresql/data
+    restart: always
     
-  # orders-ms:
-  #   container_name: orders_ms
-  #   depends_on:
-  #     - nats-server
-  #     - orders-db
-  #     - products-ms
-  #   build: ./orders-ms
-  #   environment:
-  #     - PORT=3002
-  #     - NATS_SERVERS=nats://nats-server:4222
-  #     - PRODUCTS_SERVICE_PORT=3001
-  #     - PRODUCTS_SERVICE_HOST=products-ms
-  #     - DATABASE_URL=postgresql://postgres:postgres@orders-db:5432/orders_db?schema=public
-  #   volumes:
-  #     - ./orders-ms/src:/usr/src/app/src
-  #   command: npm run start:dev
+  orders-ms:
+    container_name: orders_ms
+    depends_on:
+      - nats-server
+      - orders-db
+      - products-ms
+    build: ./orders-ms
+    environment:
+      - PORT=3002
+      - NATS_SERVERS=nats://nats-server:4222
+      - PRODUCTS_SERVICE_PORT=3001
+      - PRODUCTS_SERVICE_HOST=products-ms
+      - DATABASE_URL=postgresql://postgres:postgres@orders-db:5432/orders_db?schema=public
+    volumes:
+      - ./orders-ms/src:/usr/src/app/src
+    command: npm run start:dev
 
-  # products-ms:
-  #   container_name: products_ms
-  #   depends_on:
-  #     - nats-server
-  #   build: ./products-ms
-  #   environment:
-  #     - PORT=3001
-  #     - NATS_SERVERS=nats://nats-server:4222
-  #     - DATABASE_URL=file:./dev.db
-  #   volumes:
-  #     - ./products-ms/src:/usr/src/app/src
-  #   command: npm run start:dev
+  products-ms:
+    container_name: products_ms
+    depends_on:
+      - nats-server
+    build: ./products-ms
+    environment:
+      - PORT=3001
+      - NATS_SERVERS=nats://nats-server:4222
+      - DATABASE_URL=file:./dev.db
+    volumes:
+      - ./products-ms/src:/usr/src/app/src
+    command: npm run start:dev
 
   api-gateway:
     container_name: api_gateway
     depends_on:
       - nats-server
-      # - products-ms
+      - products-ms
     build: ./api-gateway
     environment:
       - PORT=3000
