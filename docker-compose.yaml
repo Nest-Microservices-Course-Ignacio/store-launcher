@@ -56,7 +56,7 @@ services:
       - products-ms
     build: ./api-gateway
     environment:
-      - PORT=3003
+      - PORT=3000
       - NATS_SERVERS=nats://nats-server:4222
       - PRODUCTS_MICROSERVICE_HOST=products-ms
       - PRODUCTS_MICROSERVICE_PORT=3001
@@ -79,3 +79,5 @@ services:
       - API_GATEWAY=${API_GATEWAY}
       - WEBHOOK_SECRET=${WEBHOOK_SECRET}
     command: npm run start:dev
+    ports:
+      - ${PAYMENTS_PORT}:3003
