@@ -72,6 +72,8 @@ services:
     container_name: payments_ms
     depends_on:
       - nats-server
+    volumes:
+      - ./payments-ms/src:/usr/src/app/src
     build: ./payments-ms
     environment:
       - PORT=${PAYMENTS_PORT}
