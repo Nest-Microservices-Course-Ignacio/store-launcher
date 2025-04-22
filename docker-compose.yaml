@@ -1,9 +1,11 @@
+
 services:
   nats-server:
     container_name: nats-server
     image: nats:latest
     ports:
       - 8222:8222
+      - 4222:4222
 
   orders-db:
     image: postgres:16
@@ -82,3 +84,15 @@ services:
     command: npm run start:dev
     ports:
       - ${PAYMENTS_PORT}:3003
+
+  auth-ms:
+    container_name: auth_ms
+    depends_on:
+      - nats-server
+    build: ./auth-ms
+    environment:
+      - PORT=3004
+      - NATS_SERVERS=nats://nats-server:4222
+    volumes:
+      - ./auth-ms/src:/usr/src/app/src
+    command: npm run start:dev
