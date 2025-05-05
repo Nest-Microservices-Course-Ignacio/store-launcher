@@ -10,17 +10,17 @@ services:
     image: orders_ms_prod
     depends_on:
       - nats-server
-      - products-ms
     build:
       context: ./orders-ms
       dockerfile: Dockerfile.prod
+      args:
+        - DATABASE_URL=${ORDERS_DATABASE_URL}
     environment:
       - PORT=3003
       - NATS_SERVERS=nats://nats-server:4222,nats://nats-server:4223
       - PRODUCTS_SERVICE_PORT=3001
       - PRODUCTS_SERVICE_HOST=products-ms
-      - DATABASE_URL=postgresql://postgres:postgres@orders-db:5432/orders_db?schema=public
-
+      - DATABASE_URL=${ORDERS_DATABASE_URL}
 
   products-ms:
     container_name: products_ms
