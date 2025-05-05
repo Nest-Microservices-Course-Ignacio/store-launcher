@@ -1,0 +1,86 @@
+services:
+  nats-server:
+    container_name: nats-server
+    image: nats:latest
+    ports:
+      - 8222:8222
+
+  orders-ms:
+    container_name: orders_ms
+    image: orders_ms_prod
+    depends_on:
+      - nats-server
+      - products-ms
+    build:
+      context: ./orders-ms
+      dockerfile: Dockerfile.prod
+    environment:
+      - PORT=3003
+      - NATS_SERVERS=nats://nats-server:4222,nats://nats-server:4223
+      - PRODUCTS_SERVICE_PORT=3001
+      - PRODUCTS_SERVICE_HOST=products-ms
+      - DATABASE_URL=postgresql://postgres:postgres@orders-db:5432/orders_db?schema=public
+
+
+  products-ms:
+    container_name: products_ms
+    image: products_ms_prod
+    depends_on:
+      - nats-server
+    build:
+      context: ./products-ms
+      dockerfile: Dockerfile.prod
+    environment:
+      - PORT=3003
+      - NATS_SERVERS=nats://nats-server:4222,nats://nats-server:4223
+      - DATABASE_URL=file:./dev.db
+
+  api-gateway:
+    container_name: api_gateway
+    image: api_gateway_prod
+    depends_on:
+      - nats-server
+      # - products-ms
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile.prod
+    environment:
+      - PORT=3000
+      - NATS_SERVERS=nats://nats-server:4222,nats://nats-server:4223
+      - PRODUCTS_MICROSERVICE_HOST=products-ms
+      - PRODUCTS_MICROSERVICE_PORT=3001
+      - ORDERS_MICROSERVICE_HOST=orders-ms
+      - ORDERS_MICROSERVICE_PORT=3002
+    ports:
+      - ${API_GATEWAY_PORT}:3000
+
+  payments-ms:
+    container_name: payments_ms
+    image: payments_ms_prod
+    depends_on:
+      - nats-server
+    build:
+      context: ./payments-ms
+      dockerfile: Dockerfile.prod
+    environment:
+      - PORT=${PAYMENTS_PORT}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - API_GATEWAY=${API_GATEWAY}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - NATS_SERVERS=${NATS_SERVERS}
+    ports:
+      - ${PAYMENTS_PORT}:3003
+
+  auth-ms:
+    container_name: auth_ms
+    image: auth_ms_prod
+    depends_on:
+      - nats-server
+    build:
+      context: ./auth-ms
+      dockerfile: Dockerfile.prod
+    environment:
+      - PORT=3004
+      - NATS_SERVERS=nats://nats-server:4222,nats://nats-server:4223
+      - DATABASE_URL=${AUTH_DATABASE_URL}
+      - JWT_CONSTANT=${JWT_CONSTANT}
