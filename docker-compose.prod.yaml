@@ -24,7 +24,7 @@ services:
 
   products-ms:
     container_name: products_ms
-    image: products_ms_prod
+    image: northamerica-south1-docker.pkg.dev/store-nest-ms/image-registry/products-ms
     depends_on:
       - nats-server
     build:
@@ -37,7 +37,7 @@ services:
 
   api-gateway:
     container_name: api_gateway
-    image: api_gateway_prod
+    image: northamerica-south1-docker.pkg.dev/store-nest-ms/image-registry/api-gateway
     depends_on:
       - nats-server
       # - products-ms
@@ -56,7 +56,7 @@ services:
 
   payments-ms:
     container_name: payments_ms
-    image: payments_ms_prod
+    image: northamerica-south1-docker.pkg.dev/store-nest-ms/image-registry/payments-ms
     depends_on:
       - nats-server
     build:
@@ -73,7 +73,7 @@ services:
 
   auth-ms:
     container_name: auth_ms
-    image: auth_ms_prod
+    image: northamerica-south1-docker.pkg.dev/store-nest-ms/image-registry/auth-ms
     depends_on:
       - nats-server
     build:
